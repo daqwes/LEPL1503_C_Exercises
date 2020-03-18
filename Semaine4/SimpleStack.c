@@ -1,16 +1,12 @@
-// 83 % - NOT FINISHED 
+
 {
-    if (head == NULL ) {
+    if (head == NULL || *head == NULL ) {
         return 1; 
     }
-    if ((*head)->next == NULL ) {
-        *head = NULL ;
-        return 0;
-    }
-    result = (*head)->name;  
+    strncpy(result,(*head)->name, strlen((*head)->name)+1) ;
+    free((*head)->name);  
     struct node *temp = *head; 
     *head = (*head)->next;   
-    free(temp->name) ;
     free(temp);
     return 0;
     }

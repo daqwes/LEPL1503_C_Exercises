@@ -1,65 +1,64 @@
-// 28.5% - NOT FINISHED 
 
-{   struct stat file_stat;
-    int fd  =  open (filename , O_RDWR | O_CREAT | O_TRUNC) ;
-    int a = 0 ;
+
+  struct stat buf;
+    int fd  =  open (filename , O_RDONLY );
     if ( fd == -1) {
         return -1 ;
     }
-    int size = fstat( fd , &file_stat ) ; 
+    int size = fstat( fd , &buf ) ; 
     if ( size == -1){
         return -1 ; 
     }
-    if ( index >= size ){ 
+    size_t len = buf.st_size/sizeof(int);
+          
+    if ( index >= len ){ 
+     close (fd);
      return -2 ; 
     }
-    void *mem  = mmap (NULL, size, PROT_READ, MAP_SHARED, fd, 0) ; 
-    int *nbre = mem ; 
-    if ( mem == NULL ){
+    int *mem  = mmap (NULL, len*sizeof(int), PROT_READ, MAP_SHARED, fd, 0) ; 
+    if ( mem == MAP_FAILED ){
         return -1 ; 
     }
-    for ( int i = 0 ; i < size ; i++) {
-        a += nbre[i] ;  
-    }
-    int unmem =  munmap( mem , size ) ; 
-    if ( unmem == -1 && mem != NULL){
+    int rep = mem[index];
+    int unmem =  munmap( mem , len ) ; 
+    if ( unmem == -1 ){
         return -1;
     }
     int fdc = close( fd) ;
     if ( fdc  == -1){
         return -1 ;
     }
-    return a ;
-}
+    return rep ;
 
 
 
 
-{   struct stat file_stat;
-    int fd  =  open (filename , O_RDWR | O_CREAT | O_TRUNC) ;
+{   struct stat buf;
+    int fd  =  open (filename , O_RDWR | O_CREAT ) ;
     if ( fd == -1) {
-        exit(-1);
+        return;
     }
-    int size = fstat( fd , &file_stat ) ; 
+    int size = fstat( fd , &buf ) ; 
     if ( size == -1){
-        exit(-1) ; 
+       return ; 
     }
-    if ( index >= size ){ 
-     exit(-1); 
+    size_t len = buf.st_size/sizeof(int);
+    if ( index >= len ){ 
+        close(fd);
+        return ;
     }
-    void *mem  = mmap (NULL, size, PROT_READ|PROT_WRITE, MAP_SHARED, fd, 0) ; 
-    int *nbre = mem ; 
-    if ( mem == NULL ){
-        exit(-1) ; 
+    int *mem  = mmap (NULL, len*sizeof(int), PROT_WRITE, MAP_SHARED, fd, 0) ; 
+    if ( mem == MAP_FAILED ){
+        return ; 
     }
-    nbre[index] = value ;   
+    mem[index] = value ;   
     
-    int unmem =  munmap( mem , size ) ; 
-    if ( unmem == -1 && mem != NULL){
-        exit(-1);
+    int unmem =  munmap( mem , len ) ; 
+    if ( unmem == -1 ){
+        return;
     }
     int fdc = close( fd) ;
     if ( fdc  == -1){
-        exit(-1) ;
+        return ;
     }
 }

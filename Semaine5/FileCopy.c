@@ -1,58 +1,33 @@
-// 58% - NOT FINISHED 
 
- struct stat file_stat;
- // ouverture fichier source
- int fd1 = open (file_name, O_RDWR );
+
+ struct stat buf;
+ int fd1 = open (file_name, O_RDONLY );
  if (fd1 < 0) {
    return -1;
  }
-  int fst =fstat (fd1,&file_stat);
+  int fst =fstat (fd1,&buf);
  if ( fst < 0) {
    return -1;
  }
- // ouverture fichier destination
- int fd2 =  open (new_file_name, O_RDWR );
- if (fd2< 0) {
-   return -1;
- }
+ size_t size = buf.st_size ;
+if(size == 0 ){
+    int f2 = open(new_file_name,O_CREAT | O_RDWR, buf.st_mode) ;
+    if(f2 == -1) return -1 ;
+    if(close(fd1) == -1) return -1;
+    if(close(f2) == -1) return -1;
+    return -1 ;
+}
+ int *mp = mmap(NULL,size, PROT_READ, MAP_SHARED,fd1,0);
+if(mp == MAP_FAILED) return -1 ;
 
-
-
- // mmap fichier source
- void *src = mmap (NULL, file_stat.st_size, PROT_READ | PROT_WRITE,        MAP_SHARED, fd1, 0);
- if (src   == NULL) {
-   return -1;
- }
-
- // mmap fichier destination
- void *dst = mmap (NULL, file_stat.st_size, PROT_READ | PROT_WRITE, MAP_SHARED, fd2, 0);
- if (dst  == NULL) {
-   return -1;
- }
-ftruncate(fd2,file_stat.st_size);
-
- // copie complète
- memcpy (dst, src, file_stat.st_size);
-int fin = msync(dst,file_stat.st_size, MS_ASYNC) ;
-    if (fin == -1) {
-        return -1 ; 
-    }
- // libération mémoire
- int free1 = munmap(src,file_stat.st_size);
- if(free1<0) {
-   return -1;
- }
- int free2 = munmap(dst,file_stat.st_size);
- if(free2<0) {
-   return -1;
- }
- // fermeture fichiers
- int cl1 = close(fd1);
- if(cl1<0) {
-   return -1;
- }
- int cl2 = close(fd2) ;
- if(cl2<0) {
-   return -1;
- }
- return 0;
+int f2 = open(new_file_name, O_CREAT | O_RDWR, buf.st_mode) ;
+if(f2 == -1) return -1 ;
+if(ftruncate(f2,size)==-1) return -1 ;
+void *addr = mmap(NULL,size,PROT_WRITE,MAP_SHARED,f2,0);
+if(addr == MAP_FAILED) return -1 ;
+memcpy(addr,mp, size) ;
+if(close(fd1) == -1 ) return -1 ;
+if(msync(addr , size, MS_SYNC ) == -1 ) return -1 ;
+if(munmap(addr,size) == -1 ) return -1 ;
+if(close(f2) == -1 ) return -1 ;
+return 0 ;
