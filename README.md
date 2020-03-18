@@ -2,5 +2,5 @@
 
 Exercises done on https://inginious.info.ucl.ac.be/course/LEPL1503 for the LEPL1503 course.  
 
-Update 1 : 82% 
+Update 1 : 82% \n
 Update 2 : 100%
