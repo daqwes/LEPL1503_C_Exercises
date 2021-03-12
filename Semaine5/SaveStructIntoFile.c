@@ -5,21 +5,21 @@
     if (fd == -1) {
         return fd ;
     }  
-    int ftr = ftruncate(fd,sizeof(pt)) ;
+    int ftr = ftruncate(fd,sizeof(pt)*size) ;
     if (ftr == -1) {
         return -6 ;
    
     }
-    void *mem = mmap (NULL, sizeof(point_t), PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0) ; 
-    if (mem == NULL) {
+    void *mem = mmap (NULL, sizeof(point_t)*size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0) ; 
+    if (mem == (void*)-1) {
         return -3 ;
     }
-    memcpy (mem, pt, sizeof(point_t));
-    int fin = msync(mem,sizeof(point_t), MS_ASYNC) ;
+    memcpy (mem, pt, sizeof(point_t)*size);
+    int fin = msync(mem,sizeof(point_t)*size, MS_ASYNC) ;
     if (fin == -1) {
         return -5 ; 
     }
-    int cl = munmap(mem,sizeof(point_t))  ; 
+    int cl = munmap(mem,sizeof(point_t)*size)  ; 
     if (cl == -1){ 
     return -4 ;
     }
