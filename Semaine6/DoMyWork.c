@@ -1,26 +1,23 @@
-pthread_t thread1 ;
-int a = pthread_create(&thread1,NULL,long_computing,(void*) string);
-if (a ==-1 ) {
-    return -1 ;
-}
-int* value1 = long_computing(string);
-int b = pthread_join(thread1,NULL) ;
-if (b==-1) {
-    return -2 ;
-}
-if (*value1 == ret_value) {
-    return *value1 ;
-}
-else {
-    pthread_t thread2 ;
-    int c = pthread_create(&thread2,NULL,backup_computing,(void*) string);
-if (c ==-1 ) {
-    return -3 ;
-}
-int *value2 = backup_computing(string);
-int d = pthread_join(thread2,NULL) ;
-if (d==-1) {
-    return -4 ;
-}
-    return *value2 ;
+//100% Inginious
+
+#include <pthread.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+int doMyWork(void* long_computing(void*), void* backup_computing(void*), char* string, int ret_value){
+  pthread_t my_t_1;
+  int err = pthread_create(&my_t_1, NULL, long_computing,(void *) string);
+  if(err != 0) return -1;
+  int* res = long_computing(string);
+  err = pthread_join(my_t_1,NULL);
+  if(err != 0) return -2;
+  if(*res != ret_value){
+    pthread_t my_t_2;
+    err = pthread_create(&my_t_2, NULL, backup_computing, (void *) string);
+    if(err != 0) return -3;
+    res = backup_computing(string);
+    err = pthread_join(my_t_2, NULL);
+    if(err != 0) return -4;
+  }
+  return *res;
 }
