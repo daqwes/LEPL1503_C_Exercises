@@ -5,7 +5,7 @@
     if (fd == -1) {
         return fd ;
     }  
-    int ftr = ftruncate(fd,sizeof(pt)*size) ;
+    int ftr = ftruncate(fd,sizeof(point_t)*size) ;
     if (ftr == -1) {
         return -6 ;
    
